@@ -368,7 +368,6 @@ module.exports = class BluBlock {
 
     injectCSS() {
         BdApi.DOM.addStyle("BluBlock-CSS", `
-            /* BLUBLOCK UI STYLES */
             @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
 
             .blu-overlay {
@@ -390,4 +389,5 @@ module.exports = class BluBlock {
             }
 
             /* SIDEBA
+
 
