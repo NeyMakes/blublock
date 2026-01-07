@@ -11,7 +11,6 @@ module.exports = class BluBlock {
     constructor() {
         this.graphData = new Array(80).fill(0);
         this.graphInterval = null;
-        // Logs are now loaded from persistent storage, or empty array if new session
         this.logs = [];
     }
 
@@ -40,8 +39,6 @@ module.exports = class BluBlock {
         if (m) m.remove();
     }
 
-    /* --- CORE LOGIC --- */
-
     loadSettings() {
         const defaults = {
             mode: "normal",
@@ -63,15 +60,14 @@ module.exports = class BluBlock {
             saved: 0,
             threats: 0
         };
-
-        // Load saved logs from this session if available
+        
         this.logs = BdApi.Data.load("BluBlock", "session_logs") || [];
     }
 
     saveSettings() {
         BdApi.Data.save("BluBlock", "prefs", this.prefs);
         BdApi.Data.save("BluBlock", "stats", this.stats);
-        BdApi.Data.save("BluBlock", "session_logs", this.logs); // Persist logs
+        BdApi.Data.save("BluBlock", "session_logs", this.logs);
     }
 
     shouldBlock(url) {
@@ -82,19 +78,17 @@ module.exports = class BluBlock {
         let blocked = false;
         let type = "";
 
-        // --- ULTRA AGGRESSIVE FILTERING ---
-
-        // TELEMETRY & TRACKING
+        
         if (m.telemetry && (u.includes("/science") || u.includes("track") || u.includes("metrics") || u.includes("tracing") || u.includes("experiments"))) {
             blocked = true;
             type = "Telemetry";
         }
-        // ANALYTICS & ERRORS
+      
         else if (m.analytics && (u.includes("analytics") || u.includes("sentry") || u.includes("crash") || u.includes("reporting"))) {
             blocked = true;
             type = "Analytics";
         }
-        // BLOAT & BILLING (The "Useless" Stuff)
+        
         else if (m.bloat && (
                 u.includes("billing") || u.includes("premium") || u.includes("payment") || u.includes("promotion") ||
                 u.includes("gift") || u.includes("store") || u.includes("quests") || u.includes("inventory") ||
@@ -103,17 +97,17 @@ module.exports = class BluBlock {
             blocked = true;
             type = "Bloat";
         }
-        // STICKERS
+        
         else if (m.stickers && (u.includes("sticker") || u.includes("pack") || u.includes("sticker-packs"))) {
             blocked = true;
             type = "Sticker";
         }
-        // TYPING
+      
         else if (m.typing && u.includes("typing")) {
             blocked = true;
             type = "Typing";
         }
-        // EMBEDS
+        
         else if (m.embeds && (u.includes("embed") || u.includes("preview") || u.includes("og"))) {
             blocked = true;
             type = "Embed";
@@ -132,23 +126,21 @@ module.exports = class BluBlock {
         this.stats.saved += (Math.random() * 2 + 1);
         if (type === "Analytics" || type === "Telemetry") this.stats.threats++;
 
-        // Add to persistent log
+       
         this.logs.unshift({
             time: new Date().toLocaleTimeString(),
             type: type,
             url: url
         });
 
-        // Keep last 200 logs to prevent lag
+        
         if (this.logs.length > 200) this.logs.pop();
 
-        // Update Graph
         this.graphData.shift();
-        this.graphData.push(Math.floor(Math.random() * 30 + 30)); // Visual feedback
+        this.graphData.push(Math.floor(Math.random() * 30 + 30)); /
 
         this.saveSettings();
 
-        // Live Update if UI open
         if (document.getElementById("blu-modal-main")) this.updateUI();
     }
 
@@ -176,7 +168,7 @@ module.exports = class BluBlock {
         this.prefs.mode = mode;
         const m = this.prefs.modules;
 
-        // BASE: Minimum
+       
         m.telemetry = true;
         m.analytics = true;
         m.bloat = false;
@@ -184,20 +176,20 @@ module.exports = class BluBlock {
         m.typing = false;
         m.embeds = false;
 
-        // NORMAL: Standard
+     
         if (mode === "normal") {
             m.bloat = true;
             m.stickers = true;
         }
 
-        // STRICT: Fast
+        
         if (mode === "strict") {
             m.bloat = true;
             m.stickers = true;
             m.typing = true;
         }
 
-        // TITANIUM: Maximum Speed (Blocks Visuals)
+       
         if (mode === "titanium") {
             m.bloat = true;
             m.stickers = true;
@@ -213,7 +205,7 @@ module.exports = class BluBlock {
         });
     }
 
-    /* --- UI ENGINE --- */
+
 
     openUI() {
         if (document.getElementById("blu-modal-main")) return;
@@ -225,8 +217,7 @@ module.exports = class BluBlock {
             if (e.target === modal) this.closeUI();
         };
 
-        // Complete UI HTML structure would go here based on your original file
-        // Preserving your original UI rendering logic below
+      
         modal.innerHTML = `
             <div class="blu-window">
                 <div class="blu-sidebar">
@@ -303,7 +294,7 @@ module.exports = class BluBlock {
             </div>
         `;
 
-        // Bind methods to DOM elements workaround
+
         modal.host = this;
         document.body.appendChild(modal);
         this.updateUI();
@@ -311,15 +302,14 @@ module.exports = class BluBlock {
     }
 
     switchTab(tabName, btnElement) {
-        // Hide all tabs
+ 
         const tabs = document.querySelectorAll(".blu-tab-content");
         tabs.forEach(t => t.style.display = "none");
 
-        // Show selected
         const selected = document.getElementById("tab-" + tabName);
         if (selected) selected.style.display = "block";
 
-        // Update Sidebar
+
         const navs = document.querySelectorAll(".blu-nav-item");
         navs.forEach(n => n.classList.remove("active"));
         if (btnElement) btnElement.classList.add("active");
@@ -334,12 +324,11 @@ module.exports = class BluBlock {
     updateUI() {
         if (!document.getElementById("blu-modal-main")) return;
 
-        // Update Stats
+  
         document.getElementById("stat-blocked").innerText = this.stats.blocked;
         document.getElementById("stat-saved").innerText = (this.stats.saved / 1024).toFixed(2) + " MB";
         document.getElementById("stat-threats").innerText = this.stats.threats;
 
-        // Render Logs
         const list = document.getElementById("blu-logs-list");
         if (list) {
             list.innerHTML = this.logs.map(l => `
@@ -376,7 +365,6 @@ module.exports = class BluBlock {
         }, 1000);
     }
 
-    /* --- INJECTIONS --- */
 
     injectCSS() {
         BdApi.DOM.addStyle("BluBlock-CSS", `
@@ -402,3 +390,4 @@ module.exports = class BluBlock {
             }
 
             /* SIDEBA
+
