@@ -7,7 +7,6 @@ Let's be honest—Discord is getting heavy. Between the constant tracking, the "
 I built **BluBlock** to fix that. It’s a dashboard and protection suite that lives right in your header bar, giving you control over what Discord is allowed to load.
 
 ![Preview](preview.png)
-*(Note: Don't forget to upload a screenshot named `preview.png` to this repo!)*
 
 ## 🚀 Features
 
